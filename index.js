@@ -31,6 +31,16 @@ async function run() {
 		// Collections
 		const menuCollection = client.db('bistroDB').collection('menu');
 		const reviewCollection = client.db('bistroDB').collection('reviews');
+		const cartCollection = client.db('bistroDB').collection('carts');
+
+		// ----------Cart related api------------
+
+		// Store carted product item to the database
+		app.post('/carts', async (req, res) => {
+			const cartItem = req.body;
+			const result = await cartCollection.insertOne(cartItem);
+			res.send(result);
+		});
 
 		// Get all menu
 		app.get('/menu', async (req, res) => {
