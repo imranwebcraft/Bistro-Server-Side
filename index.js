@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -35,10 +35,29 @@ async function run() {
 
 		// ----------Cart related api------------
 
+		//get cart data by specific user
+		app.get('/carts', async (req, res) => {
+			const email = req.query.email;
+			let query = {};
+			if (email) {
+				query = { email: email };
+			}
+			const result = await cartCollection.find(query).toArray();
+			res.send(result);
+		});
+
 		// Store carted product item to the database
 		app.post('/carts', async (req, res) => {
 			const cartItem = req.body;
 			const result = await cartCollection.insertOne(cartItem);
+			res.send(result);
+		});
+
+		// Delete an cart item
+		app.delete('/carts/:id', async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: new ObjectId(id) };
+			const result = await cartCollection.deleteOne(filter);
 			res.send(result);
 		});
 
