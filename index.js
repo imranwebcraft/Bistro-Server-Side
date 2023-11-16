@@ -32,8 +32,28 @@ async function run() {
 		const menuCollection = client.db('bistroDB').collection('menu');
 		const reviewCollection = client.db('bistroDB').collection('reviews');
 		const cartCollection = client.db('bistroDB').collection('carts');
+		const userCollection = client.db('bistroDB').collection('users');
 
-		// ----------Cart related api------------
+		// ----------USER related api------------ //
+		app.post('/users', async (req, res) => {
+			const user = req.body;
+			// Insert user info if email doesn't exist to the database
+			// There are many ways to do that--- ( 1. email unique 2. upsert 3. simple chekcing )
+			// Check
+			const query = { email: user?.email };
+			const existingUser = await userCollection.findOne(query);
+			if (existingUser) {
+				return res.send({
+					message: 'User already in Database',
+					insertedId: null,
+				});
+			}
+			// if user does't exist then insert use info to the database
+			const result = await userCollection.insertOne(user);
+			res.send(result);
+		});
+
+		// ----------Cart related api------------ //
 
 		//get cart data by specific user
 		app.get('/carts', async (req, res) => {
@@ -60,6 +80,8 @@ async function run() {
 			const result = await cartCollection.deleteOne(filter);
 			res.send(result);
 		});
+
+		// ----------Menu related api------------ //
 
 		// Get all menu
 		app.get('/menu', async (req, res) => {
