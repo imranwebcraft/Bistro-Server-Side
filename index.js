@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 const port = process.env.PORT || 5000;
 // Express app variable
@@ -33,6 +34,16 @@ async function run() {
 		const reviewCollection = client.db('bistroDB').collection('reviews');
 		const cartCollection = client.db('bistroDB').collection('carts');
 		const userCollection = client.db('bistroDB').collection('users');
+
+		// ----------JWT related api------------ //
+
+		app.post('/jwt', async (req, res) => {
+			const user = req.body;
+			const token = jwt.sign(user, process.env.ACCESS_TOKE_SECRET, {
+				expiresIn: '12h',
+			});
+			res.send({ token });
+		});
 
 		// ----------USER related api------------ //
 
