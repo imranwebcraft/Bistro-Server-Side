@@ -35,6 +35,15 @@ async function run() {
 		const userCollection = client.db('bistroDB').collection('users');
 
 		// ----------USER related api------------ //
+
+		// Get all users data from database
+		app.get('/users', async (req, res) => {
+			const query = {};
+			const result = await userCollection.find(query).toArray();
+			res.send(result);
+		});
+
+		// Post user info to database
 		app.post('/users', async (req, res) => {
 			const user = req.body;
 			// Insert user info if email doesn't exist to the database
