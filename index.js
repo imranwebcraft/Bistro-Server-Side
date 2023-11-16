@@ -35,6 +35,26 @@ async function run() {
 		const cartCollection = client.db('bistroDB').collection('carts');
 		const userCollection = client.db('bistroDB').collection('users');
 
+		// MiddleWare
+		const verifyToken = (req, res, next) => {
+			// Check is there authorization header
+			// if not???
+			if (!req?.headers?.authorization) {
+				return res.status(401).send({ message: 'unAuthorize access' });
+			}
+
+			// if there, get the token
+			const token = req.headers?.authorization.split(' ')[1];
+
+			jwt.verify(token, process.env.ACCESS_TOKE_SECRET, (err, decoded) => {
+				if (err) {
+					res.status(401).send({ message: 'unAuthorize access' });
+				}
+				req.user = decoded;
+				next();
+			});
+		};
+
 		// ----------JWT related api------------ //
 
 		app.post('/jwt', async (req, res) => {
@@ -45,10 +65,34 @@ async function run() {
 			res.send({ token });
 		});
 
+		// ----------get ADMIN api------------ //
+
+		app.get('/users/admin/:email', verifyToken, async (req, res) => {
+			const email = req.params.email;
+			if (email !== req.user.email) {
+				// Do something
+				return res.status(403).send({
+					message: 'forbiden access',
+				});
+			}
+
+			// Chec user role to the database
+			const query = { email: email };
+			// Ei email diye user take khuje ber korbo
+			const user = await userCollection.findOne(query);
+
+			let admin = false;
+			if (user?.role === 'admin') {
+				admin = true;
+			}
+			res.send({ admin });
+		});
+
 		// ----------USER related api------------ //
 
 		// Get all users data from database
-		app.get('/users', async (req, res) => {
+		app.get('/users', verifyToken, async (req, res) => {
+			// console.log(req.headers);
 			const query = {};
 			const result = await userCollection.find(query).toArray();
 			res.send(result);
