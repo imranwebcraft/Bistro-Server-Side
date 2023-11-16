@@ -36,6 +36,9 @@ async function run() {
 		const userCollection = client.db('bistroDB').collection('users');
 
 		// MiddleWare
+
+		// ----------------- TOKEN VERIFY ---------------------//
+
 		const verifyToken = (req, res, next) => {
 			// Check is there authorization header
 			// if not???
@@ -53,6 +56,21 @@ async function run() {
 				req.user = decoded;
 				next();
 			});
+		};
+
+		// use verify admin after verify token
+		// ------------------ ADmin Verify ---------------------//
+
+		const verifyAdmin = async (req, res, next) => {
+			// Token ta jar se admin kina check korbo
+			const email = req.user.email;
+			const query = { email: email };
+			const user = await userCollection.findOne(query);
+			const isAdmin = user?.role === 'admin';
+			if (!isAdmin) {
+				return res.status(403).send({ message: 'forbiden access' });
+			}
+			next();
 		};
 
 		// ----------JWT related api------------ //
@@ -81,17 +99,17 @@ async function run() {
 			// Ei email diye user take khuje ber korbo
 			const user = await userCollection.findOne(query);
 
-			let admin = false;
+			let isAdmin = false;
 			if (user?.role === 'admin') {
-				admin = true;
+				isAdmin = true;
 			}
-			res.send({ admin });
+			res.send({ isAdmin });
 		});
 
 		// ----------USER related api------------ //
 
 		// Get all users data from database
-		app.get('/users', verifyToken, async (req, res) => {
+		app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
 			// console.log(req.headers);
 			const query = {};
 			const result = await userCollection.find(query).toArray();
