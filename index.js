@@ -194,6 +194,15 @@ async function run() {
 			const result = await menuCollection.find(query).toArray();
 			res.send(result);
 		});
+		// Post a new menu Item
+		app.post('/menu', verifyToken, verifyAdmin, async (req, res) => {
+			const menuItem = req.body;
+			const result = await menuCollection.insertOne(menuItem);
+			res.send(result);
+		});
+
+		// ----------Review related api------------ //
+
 		// Get all reviews
 		app.get('/reviews', async (req, res) => {
 			const query = {};
