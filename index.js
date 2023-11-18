@@ -118,7 +118,7 @@ async function run() {
 			res.send(result);
 		});
 
-		// Delete single users
+		// 💀💀Delete single users💀💀💀
 		app.delete('/users/:id', async (req, res) => {
 			const id = req.params.id;
 			const query = { _id: new ObjectId(id) };
@@ -194,10 +194,27 @@ async function run() {
 			const result = await menuCollection.find(query).toArray();
 			res.send(result);
 		});
+
+		// Get a specific menu item
+		app.get('/menu/:id', async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id) };
+			const result = await menuCollection.findOne(query);
+			res.send(result);
+		});
+
 		// Post a new menu Item
 		app.post('/menu', verifyToken, verifyAdmin, async (req, res) => {
 			const menuItem = req.body;
 			const result = await menuCollection.insertOne(menuItem);
+			res.send(result);
+		});
+
+		// 💀💀Delete a menu item 💀💀
+		app.delete('/menu/:id', async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id) };
+			const result = await menuCollection.deleteOne(query);
 			res.send(result);
 		});
 
