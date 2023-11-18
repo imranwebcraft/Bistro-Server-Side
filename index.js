@@ -68,7 +68,9 @@ async function run() {
 			const user = await userCollection.findOne(query);
 			const isAdmin = user?.role === 'admin';
 			if (!isAdmin) {
-				return res.status(403).send({ message: 'forbiden access' });
+				return res
+					.status(403)
+					.send({ message: 'forbiden access from verify admin' });
 			}
 			next();
 		};
@@ -83,9 +85,11 @@ async function run() {
 			res.send({ token });
 		});
 
-		// ----------get ADMIN api------------ //
+		// ----------Get ADMIN api------------ //
 
 		app.get('/users/admin/:email', verifyToken, async (req, res) => {
+			// Problem: Unable to get email from front end, for this reason ultimately verify token midddleware unable to verify the token
+			// Now solve with render the dashboard within a private route, that will help the useAdmin route to take time to get the user email.
 			const email = req.params.email;
 			if (email !== req.user.email) {
 				// Do something
@@ -93,12 +97,10 @@ async function run() {
 					message: 'forbiden access',
 				});
 			}
-
 			// Chec user role to the database
 			const query = { email: email };
 			// Ei email diye user take khuje ber korbo
 			const user = await userCollection.findOne(query);
-
 			let isAdmin = false;
 			if (user?.role === 'admin') {
 				isAdmin = true;
