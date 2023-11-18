@@ -210,6 +210,24 @@ async function run() {
 			res.send(result);
 		});
 
+		// Patch a specifi menu detais
+		app.patch('/menu/:id', async (req, res) => {
+			const id = req.params.id;
+			const menu = req.body;
+			const filter = { _id: new ObjectId(id) };
+			const updateDoc = {
+				$set: {
+					name: menu.name,
+					recipe: menu.recipe,
+					image: menu.image,
+					category: menu.category,
+					price: menu.price,
+				},
+			};
+			const result = await menuCollection.updateOne(filter, updateDoc);
+			res.send(result);
+		});
+
 		// 💀💀Delete a menu item 💀💀
 		app.delete('/menu/:id', async (req, res) => {
 			const id = req.params.id;
