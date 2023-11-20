@@ -176,6 +176,8 @@ async function run() {
 			});
 		});
 
+		// Save payment data to the server and delete cart item data using deleteMany mongoDB function
+
 		app.post('/payments', async (req, res) => {
 			const payment = req.body;
 			const paymentResult = await paymentCollection.insertOne(payment);
@@ -187,6 +189,18 @@ async function run() {
 			};
 			const deleteResult = await cartCollection.deleteMany(query);
 			res.send({ paymentResult, deleteResult });
+		});
+
+		// Get payment information using user email address
+		app.get('/payments/:email', verifyToken, async (req, res) => {
+			const email = req.params.email;
+			const tokenEmial = req.user.email;
+			if (email !== tokenEmial) {
+				res.status(403).send({ message: 'forbidden access' });
+			}
+			const query = { email: email };
+			const result = await paymentCollection.find(query).toArray();
+			res.send(result);
 		});
 
 		// ----------Cart related api------------ //
