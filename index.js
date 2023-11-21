@@ -290,6 +290,42 @@ async function run() {
 			res.send(result);
 		});
 
+		// ----------------- Stats / AnyLytics Related Api ------------------
+
+		app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
+			const users = await userCollection.estimatedDocumentCount();
+			const menuItems = await menuCollection.estimatedDocumentCount();
+			const orders = await paymentCollection.estimatedDocumentCount();
+
+			// ----------------- Bangle System ------------
+			// const payments = await paymentCollection.find().toArray();
+			// const revenue = payments.reduce((total, item) => total + item.price, 0);
+
+			//  --------------- Best Way -----------------
+
+			// This result will return an array of object called totalRevenue
+			const result = await paymentCollection
+				.aggregate([
+					{
+						$group: {
+							_id: null, // null mean ami sob gulo ke bujhasci, specific id dile specific filed bujhaito
+							totalRevenue: { $sum: '$price' },
+						},
+					},
+				])
+				.toArray();
+
+			const revenue =
+				result.length > 0 ? result[0].totalRevenue : 'No payment Found';
+
+			res.send({
+				users,
+				menuItems,
+				orders,
+				revenue,
+			});
+		});
+
 		// Send a ping
 		await client.db('admin').command({ ping: 1 });
 		console.log(
